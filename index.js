@@ -16,13 +16,13 @@ const genres = [
     {id:9, name:'Mistery'}
 ]
 
-
 app.get('/vidly/genres', (req, res) => {
     res.send(genres)
 })
 
 app.post('/vidly/genres', (req, res) => {
-    const{error} = Joi.validate(req.body)
+
+    const{error} = Joi.validateGenre(req.body)
 
     if(error) return res.status(400).send(result.error.details[0].message)
 
@@ -35,6 +35,43 @@ app.post('/vidly/genres', (req, res) => {
     res.send(genre)
 })
 
+app.put('/vidly/genres/:id', (req, res) => {
+
+    const genre = genres.find(g => g.id === parseInt(req.params.id));
+    if (!genre) return res.status(404).send('The genre was not found.');
+  
+    const { error } = validateGenre(req.body); 
+    if (error) return res.status(400).send(error.details[0].message);
+    
+    genre.name = req.body.name; 
+    res.send(genre);
+  });
+
+app.delete('/vidly/genres/:id', (req, res) => {
+
+    const genre = genres.find(g => g.id === parseInt(req.params.id));
+    if (!genre) return res.status(404).send('The genre was not found.');
+  
+    const index = genres.indexOf(genre);
+    genres.splice(index, 1);
+  
+    res.send(genre);
+  });
+  
+  app.get('/vidly/genres/:id', (req, res) => {
+
+    const genre = genres.find(g => g.id === parseInt(req.params.id));
+    if (!genre) return res.status(404).send('The genre was not found.');
+    res.send(genre);
+  });
+  
+  function validateGenre(genre) {
+    const schema = {
+      name: Joi.string().min(3).required()
+    };
+  
+    return Joi.validate(genre, schema);
+  }
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Listening on port ${port}`))
