@@ -13,5 +13,28 @@ const genres = [
     {id:6, name:'Crime'},
     {id:7, name:'Documentary'},
     {id:8, name:'Sci Fi'},
-    {id:9, name:'Mistery'},
+    {id:9, name:'Mistery'}
 ]
+
+
+app.get('/vidly/genres', (req, res) => {
+    res.send(genres)
+})
+
+app.post('/vidly/genres', (req, res) => {
+    const{error} = Joi.validate(req.body)
+
+    if(error) return res.status(400).send(result.error.details[0].message)
+
+    const genre = {
+        id:genres.length + 1,
+        name: req.body.name
+    }
+
+    genres.push(genre)
+    res.send(genre)
+})
+
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => console.log(`Listening on port ${port}`))
