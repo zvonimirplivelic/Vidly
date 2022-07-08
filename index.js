@@ -1,5 +1,5 @@
-const express = require('express');
 const Joi = require('joi');
+const express = require('express');
 const app = express();
 
 app.use(express.json());
@@ -22,28 +22,33 @@ app.get('/vidly/genres', (req, res) => {
 
 app.post('/vidly/genres', (req, res) => {
 
-    const{error} = Joi.validateGenre(req.body)
+  const name = {name: req.body.name} 
 
-    if(error) return res.status(400).send(result.error.details[0].message)
+  const result = validateGenre(name)
 
-    const genre = {
-        id:genres.length + 1,
-        name: req.body.name
-    }
+  if (result.error) {
+    res.status(400).send(result.error.details[0].message);
+  }
+  
+  const genre = {
+    id: genres.length + 1,
+    name: req.body.name
+  }
 
-    genres.push(genre)
-    res.send(genre)
+  genres.push(genre)
+  res.send(genre)
 })
 
 app.put('/vidly/genres/:id', (req, res) => {
+    const name = {name: req.body.name} 
 
     const genre = genres.find(g => g.id === parseInt(req.params.id));
     if (!genre) return res.status(404).send('The genre was not found.');
   
-    const { error } = validateGenre(req.body); 
-    if (error) return res.status(400).send(error.details[0].message);
+    const result = validateGenre(req.body.name); 
+    if (result.error) return res.status(400).send(error.details[0].message);
     
-    genre.name = req.body.name; 
+    genre.name = name; 
     res.send(genre);
   });
 
@@ -66,12 +71,12 @@ app.delete('/vidly/genres/:id', (req, res) => {
   });
   
   function validateGenre(genre) {
-    const schema = {
+    const schema = Joi.object({
       name: Joi.string().min(3).required()
+    });
+    
+    return schema.validate(genre);
     };
-  
-    return Joi.validate(genre, schema);
-  }
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 app.listen(port, () => console.log(`Listening on port ${port}`))
